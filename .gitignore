@@ -19,6 +19,6 @@ dist/
 docker-compose-private.yml
 .vscode
 .idea
-
+vendor/*
 # OS misc
 .DS_Store
