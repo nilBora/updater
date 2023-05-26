@@ -16,6 +16,7 @@ import (
 	"github.com/go-pkgz/rest"
 	store "github.com/umputun/updater/app/store"
 	"github.com/umputun/updater/app/task"
+	"github.com/google/uuid"
 )
 
 //go:generate moq -out mocks/config.go -pkg mocks -skip-ensure -fmt goimports . Config
@@ -39,7 +40,7 @@ type Config interface {
 
 // Runner executes commands
 type Runner interface {
-	Run(ctx context.Context, command string, logWriter io.Writer) error
+	Run(ctx context.Context, command string, logWriter io.Writer, uuid string) error
 }
 
 // Run starts http server and closes on context cancellation
@@ -90,10 +91,14 @@ func (s *Rest) taskInfo(w http.ResponseWriter, r *http.Request) {
     log.Printf(uuid)
     str := s.DataStore.Get("test", uuid)
 
-    res := task.CommandInfo{}
+    res := task.CommandBatchInfo{}
     json.Unmarshal([]byte(str), &res)
-
-    fmt.Fprint(w, res.Result)
+    fmt.Fprint(w, "Result Command, Uuid: "+uuid+"\n")
+    for _, item := range res.Items {
+         fmt.Fprint(w, "\n--------------------------\n\n")
+         fmt.Fprint(w, "Command: "+item.Command+"\n")
+         fmt.Fprint(w, "Result: "+item.Result+"\n")
+    }
 }
 
 // GET /update/{task}/{key}?async=[0|1]
@@ -133,23 +138,25 @@ func (s *Rest) execTask(w http.ResponseWriter, r *http.Request, secret, taskName
 
 	log.Printf("[INFO] invoke task %s", taskName)
 
+    uuid := uuid.New().String()
+
 	if isAsync {
 		go func() {
-			if err := s.Runner.Run(context.Background(), command, log.ToWriter(log.Default(), ">")); err != nil {
+			if err := s.Runner.Run(context.Background(), command, log.ToWriter(log.Default(), ">"), uuid); err != nil {
 				log.Printf("[WARN] failed command")
 				return
 			}
 		}()
-		rest.RenderJSON(w, rest.JSON{"submitted": "ok", "task": taskName})
+		rest.RenderJSON(w, rest.JSON{"submitted": "ok", "task": taskName, "uuid": uuid})
 		return
 	}
 
-	if err := s.Runner.Run(r.Context(), command, log.ToWriter(log.Default(), ">")); err != nil {
+	if err := s.Runner.Run(r.Context(), command, log.ToWriter(log.Default(), ">"), uuid); err != nil {
 		http.Error(w, "failed command", http.StatusInternalServerError)
 		return
 	}
 
-	rest.RenderJSON(w, rest.JSON{"updated": "ok", "task": taskName})
+	rest.RenderJSON(w, rest.JSON{"updated": "ok", "task": taskName, "uuid": uuid})
 }
 
 // middleware for slowing requests downs

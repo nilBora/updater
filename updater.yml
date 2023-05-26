@@ -3,6 +3,8 @@ tasks:
     command: |
       echo test 123  
       pwd
+      sleep 1
+      echo "After Sleep"
 
   - name: multiline
     command: |
