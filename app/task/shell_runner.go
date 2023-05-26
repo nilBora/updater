@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/pkg/errors"
 	store "github.com/umputun/updater/app/store"
-	"github.com/google/uuid"
 )
 
 // ShellRunner executes commands with shell
@@ -28,7 +27,7 @@ type ShellRunner struct {
 }
 
 // Run command in shell with provided logger
-func (s *ShellRunner) Run(ctx context.Context, command string, logWriter io.Writer) error {
+func (s *ShellRunner) Run(ctx context.Context, command string, logWriter io.Writer, uuid string) error {
 	if command == "" {
 		return nil
 	}
@@ -46,6 +45,9 @@ func (s *ShellRunner) Run(ctx context.Context, command string, logWriter io.Writ
 		}
 		return s.runBatch(batchFile, logWriter, s.TimeOut)
 	}
+
+    items := []CommandInfo{}
+    commandBatchInfo := CommandBatchInfo{items}
 
 	execCmd := func(command string) error {
 		log.Printf("[INFO] execute %q", command)
@@ -70,14 +72,10 @@ func (s *ShellRunner) Run(ctx context.Context, command string, logWriter io.Writ
 			return fmt.Errorf("failed to execute %s: %w", command, err)
 		}
 
-        commandInfo := &CommandInfo{Command: command, Result: outb.String()}
-        commandInfoBytes, err := json.Marshal(commandInfo)
-        if err != nil {
-            return fmt.Errorf("failed to marshal")
-        }
-        uuid := uuid.New().String()
-        log.Printf("UUID: %s", uuid)
-		s.DataStore.Set("test", uuid, string(commandInfoBytes))
+        commandInfo := CommandInfo{Command: command, Result: outb.String()}
+
+        commandBatchInfo.AddItem(commandInfo)
+
 		return nil
 	}
 
@@ -90,7 +88,22 @@ func (s *ShellRunner) Run(ctx context.Context, command string, logWriter io.Writ
 		}
 	}
 
+	commandInfoBytes, err := json.Marshal(commandBatchInfo)
+
+    fmt.Println(string(commandInfoBytes))
+
+    if err != nil {
+        return fmt.Errorf("failed to marshal")
+    }
+
+    s.DataStore.Set("test", uuid, string(commandInfoBytes))
+
 	return nil
+}
+
+func (commandBatchInfo *CommandBatchInfo) AddItem(item CommandInfo) []CommandInfo {
+        commandBatchInfo.Items = append(commandBatchInfo.Items, item)
+        return commandBatchInfo.Items
 }
 
 func (s *ShellRunner) runBatch(batchFile string, logWriter io.Writer, timeout time.Duration) error {
