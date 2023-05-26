@@ -87,6 +87,7 @@ func main() {
 		Config:      conf,
 		Runner:      runner,
 		UpdateDelay: opts.UpdateDelay,
+		DataStore: sec,
 	}
 
 	if err := srv.Run(ctx); err != nil {
