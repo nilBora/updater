@@ -7,12 +7,15 @@ import (
 	"io"
 	"net/http"
 	"time"
+	"fmt"
 
 	"github.com/didip/tollbooth/v7"
 	"github.com/didip/tollbooth_chi"
 	"github.com/go-chi/chi/v5"
 	log "github.com/go-pkgz/lgr"
 	"github.com/go-pkgz/rest"
+	store "github.com/umputun/updater/app/store"
+	"github.com/umputun/updater/app/task"
 )
 
 //go:generate moq -out mocks/config.go -pkg mocks -skip-ensure -fmt goimports . Config
@@ -26,6 +29,7 @@ type Rest struct {
 	Config      Config
 	Runner      Runner
 	UpdateDelay time.Duration
+	DataStore store.Store
 }
 
 // Config declares command loader from config for given tasks
@@ -84,6 +88,12 @@ func (s *Rest) router() http.Handler {
 func (s *Rest) taskInfo(w http.ResponseWriter, r *http.Request) {
     uuid := chi.URLParam(r, "uuid")
     log.Printf(uuid)
+    str := s.DataStore.Get("test", uuid)
+
+    res := task.CommandInfo{}
+    json.Unmarshal([]byte(str), &res)
+
+    fmt.Fprint(w, res.Result)
 }
 
 // GET /update/{task}/{key}?async=[0|1]

@@ -10,11 +10,13 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"encoding/json"
 
 	log "github.com/go-pkgz/lgr"
 	"github.com/hashicorp/go-multierror"
 	"github.com/pkg/errors"
 	store "github.com/umputun/updater/app/store"
+	"github.com/google/uuid"
 )
 
 // ShellRunner executes commands with shell
@@ -54,11 +56,12 @@ func (s *ShellRunner) Run(ctx context.Context, command string, logWriter io.Writ
 			log.Printf("[DEBUG] suppress error for %s", command)
 		}
 		cmd := exec.CommandContext(ctx, "sh", "-c", command) // nolint
-        //var outb bytes.Buffer
-        //cmd.Stdout = &outb
-		cmd.Stdout = logWriter
+        var outb bytes.Buffer
+        cmd.Stdout = &outb
+		//cmd.Stdout = logWriter
 		cmd.Stderr = logWriter
 		cmd.Stdin = os.Stdin
+
 		if err := cmd.Run(); err != nil {
 			if suppressError {
 				log.Printf("[WARN] suppressed error executing %q, %v", command, err)
@@ -66,6 +69,15 @@ func (s *ShellRunner) Run(ctx context.Context, command string, logWriter io.Writ
 			}
 			return fmt.Errorf("failed to execute %s: %w", command, err)
 		}
+
+        commandInfo := &CommandInfo{Command: command, Result: outb.String()}
+        commandInfoBytes, err := json.Marshal(commandInfo)
+        if err != nil {
+            return fmt.Errorf("failed to marshal")
+        }
+        uuid := uuid.New().String()
+        log.Printf("UUID: %s", uuid)
+		s.DataStore.Set("test", uuid, string(commandInfoBytes))
 		return nil
 	}
 
