@@ -6,7 +6,7 @@ import (
   jbolt "github.com/umputun/updater/app/store/jbolt"
 )
 
-const TOKEN_KEY = "jtrw/secret"
+const BUCKET_KEY = "jtrw/updater/command/info"
 
 type Store struct {
 	StorePath string

@@ -90,13 +90,11 @@ func (s *ShellRunner) Run(ctx context.Context, command string, logWriter io.Writ
 
 	commandInfoBytes, err := json.Marshal(commandBatchInfo)
 
-    fmt.Println(string(commandInfoBytes))
-
     if err != nil {
         return fmt.Errorf("failed to marshal")
     }
 
-    s.DataStore.Set("test", uuid, string(commandInfoBytes))
+    s.DataStore.Set(store.BUCKET_KEY, uuid, string(commandInfoBytes))
 
 	return nil
 }

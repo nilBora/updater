@@ -88,8 +88,7 @@ func (s *Rest) router() http.Handler {
 
 func (s *Rest) taskInfo(w http.ResponseWriter, r *http.Request) {
     uuid := chi.URLParam(r, "uuid")
-    log.Printf(uuid)
-    str := s.DataStore.Get("test", uuid)
+    str := s.DataStore.Get(store.BUCKET_KEY, uuid)
 
     res := task.CommandBatchInfo{}
     json.Unmarshal([]byte(str), &res)
