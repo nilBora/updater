@@ -71,8 +71,9 @@ func (s *ShellRunner) Run(ctx context.Context, command string, logWriter io.Writ
 			}
 			return fmt.Errorf("failed to execute %s: %w", command, err)
 		}
-
-        commandInfo := CommandInfo{Command: command, Result: outb.String()}
+		commandResult := outb.String()
+        logWriter.Write([]byte(commandResult))
+        commandInfo := CommandInfo{Command: command, Result: commandResult}
 
         commandBatchInfo.AddItem(commandInfo)
 

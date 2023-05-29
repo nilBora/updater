@@ -95,8 +95,8 @@ func (s *Rest) taskInfo(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "Result Command, Uuid: "+uuid+"\n")
     for _, item := range res.Items {
          fmt.Fprint(w, "\n--------------------------\n\n")
-         fmt.Fprint(w, "Command: "+item.Command+"\n")
-         fmt.Fprint(w, "Result: "+item.Result+"\n")
+         fmt.Fprint(w, "> "+item.Command+"\n")
+         fmt.Fprint(w, item.Result+"\n")
     }
 }
 
