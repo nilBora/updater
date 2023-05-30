@@ -89,7 +89,10 @@ func (s *Rest) router() http.Handler {
 func (s *Rest) taskInfo(w http.ResponseWriter, r *http.Request) {
     uuid := chi.URLParam(r, "uuid")
     str := s.DataStore.Get(store.BUCKET_KEY, uuid)
-
+    if len(string(str)) <= 0 {
+         fmt.Fprint(w, "Result Not Found")
+         return
+    }
     res := task.CommandBatchInfo{}
     json.Unmarshal([]byte(str), &res)
     fmt.Fprint(w, "Result Command, Uuid: "+uuid+"\n")
@@ -105,7 +108,8 @@ func (s *Rest) taskCtrl(w http.ResponseWriter, r *http.Request) {
 	taskName := chi.URLParam(r, "task")
 	key := chi.URLParam(r, "key")
 	isAsync := r.URL.Query().Get("async") == "1" || r.URL.Query().Get("async") == "yes"
-	s.execTask(w, r, key, taskName, isAsync)
+	isSave := r.URL.Query().Get("save") == "1" || r.URL.Query().Get("save") == "yes"
+	s.execTask(w, r, key, taskName, isAsync, isSave)
 }
 
 // POST /update
@@ -114,16 +118,17 @@ func (s *Rest) taskPostCtrl(w http.ResponseWriter, r *http.Request) {
 		Task   string `json:"task"`
 		Secret string `json:"secret"`
 		Async  bool   `json:"async"`
+		Save   bool   `json:"save"`
 	}{}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "failed to decode request", http.StatusBadRequest)
 		return
 	}
-	s.execTask(w, r, req.Secret, req.Task, req.Async)
+	s.execTask(w, r, req.Secret, req.Task, req.Async, req.Save)
 }
 
-func (s *Rest) execTask(w http.ResponseWriter, r *http.Request, secret, taskName string, isAsync bool) {
+func (s *Rest) execTask(w http.ResponseWriter, r *http.Request, secret, taskName string, isAsync bool, isSave bool) {
 	if subtle.ConstantTimeCompare([]byte(secret), []byte(s.SecretKey)) != 1 {
 		http.Error(w, "rejected", http.StatusForbidden)
 		return
@@ -137,25 +142,28 @@ func (s *Rest) execTask(w http.ResponseWriter, r *http.Request, secret, taskName
 
 	log.Printf("[INFO] invoke task %s", taskName)
 
-    uuid := uuid.New().String()
+    uuidStr := ""
+    if isSave {
+        uuidStr = uuid.New().String()
+    }
 
 	if isAsync {
 		go func() {
-			if err := s.Runner.Run(context.Background(), command, log.ToWriter(log.Default(), ">"), uuid); err != nil {
+			if err := s.Runner.Run(context.Background(), command, log.ToWriter(log.Default(), ">"), uuidStr); err != nil {
 				log.Printf("[WARN] failed command")
 				return
 			}
 		}()
-		rest.RenderJSON(w, rest.JSON{"submitted": "ok", "task": taskName, "uuid": uuid})
+		rest.RenderJSON(w, rest.JSON{"submitted": "ok", "task": taskName, "uuid": uuidStr})
 		return
 	}
 
-	if err := s.Runner.Run(r.Context(), command, log.ToWriter(log.Default(), ">"), uuid); err != nil {
+	if err := s.Runner.Run(r.Context(), command, log.ToWriter(log.Default(), ">"), uuidStr); err != nil {
 		http.Error(w, "failed command", http.StatusInternalServerError)
 		return
 	}
 
-	rest.RenderJSON(w, rest.JSON{"updated": "ok", "task": taskName, "uuid": uuid})
+	rest.RenderJSON(w, rest.JSON{"updated": "ok", "task": taskName, "uuid": uuidStr})
 }
 
 // middleware for slowing requests downs
