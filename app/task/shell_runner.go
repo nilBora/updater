@@ -73,6 +73,7 @@ func (s *ShellRunner) Run(ctx context.Context, command string, logWriter io.Writ
 		}
 		commandResult := outb.String()
         logWriter.Write([]byte(commandResult))
+
         commandInfo := CommandInfo{Command: command, Result: commandResult}
 
         commandBatchInfo.AddItem(commandInfo)
@@ -94,8 +95,9 @@ func (s *ShellRunner) Run(ctx context.Context, command string, logWriter io.Writ
     if err != nil {
         return fmt.Errorf("failed to marshal")
     }
-
-    s.DataStore.Set(store.BUCKET_KEY, uuid, string(commandInfoBytes))
+    if len(uuid) > 0 {
+        s.DataStore.Set(store.BUCKET_KEY, uuid, string(commandInfoBytes))
+    }
 
 	return nil
 }
