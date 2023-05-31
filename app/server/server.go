@@ -95,7 +95,7 @@ func (s *Rest) taskInfo(w http.ResponseWriter, r *http.Request) {
     }
     res := task.CommandBatchInfo{}
     json.Unmarshal([]byte(str), &res)
-    fmt.Fprint(w, "Result Command, Uuid: "+uuid+"\n")
+    fmt.Fprint(w, "Uuid: "+uuid+"\n")
     for _, item := range res.Items {
          fmt.Fprint(w, "\n--------------------------\n\n")
          fmt.Fprint(w, "> "+item.Command+"\n")
@@ -154,7 +154,11 @@ func (s *Rest) execTask(w http.ResponseWriter, r *http.Request, secret, taskName
 				return
 			}
 		}()
-		rest.RenderJSON(w, rest.JSON{"submitted": "ok", "task": taskName, "uuid": uuidStr})
+		if isSave {
+		    rest.RenderJSON(w, rest.JSON{"submitted": "ok", "task": taskName, "uuid": uuidStr})
+		    return
+		}
+		rest.RenderJSON(w, rest.JSON{"submitted": "ok", "task": taskName})
 		return
 	}
 
@@ -163,7 +167,11 @@ func (s *Rest) execTask(w http.ResponseWriter, r *http.Request, secret, taskName
 		return
 	}
 
-	rest.RenderJSON(w, rest.JSON{"updated": "ok", "task": taskName, "uuid": uuidStr})
+    if isSave {
+        rest.RenderJSON(w, rest.JSON{"updated": "ok", "task": taskName, "uuid": uuidStr})
+        return
+    }
+    rest.RenderJSON(w, rest.JSON{"updated": "ok", "task": taskName})
 }
 
 // middleware for slowing requests downs
