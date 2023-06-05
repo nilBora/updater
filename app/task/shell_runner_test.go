@@ -51,7 +51,6 @@ func TestShellRunner_Run(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, lw.String(), "not found")
 	}
-
 }
 
 func TestShellRunner_RunMultiLine(t *testing.T) {
@@ -96,6 +95,7 @@ func TestShellRunner_RunBatchTimeOut(t *testing.T) {
 	lw := bytes.NewBuffer(nil)
 	st := time.Now()
 	uuidStr := uuid.New().String()
+
 	err := sr.Run(context.Background(), "sleep 1 && sleep 1 && echo 123\necho 345", lw, uuidStr)
 	require.Error(t, err)
 	assert.True(t, time.Since(st) < time.Second*2)

@@ -73,7 +73,7 @@ func (s *Rest) router() http.Handler {
 	router := chi.NewRouter()
 	router.Use(rest.Recoverer(log.Default()))
 	router.Use(rest.Throttle(100)) // limit total number of the running requests
-	router.Use(rest.AppInfo("updater", "umputun", s.Version))
+	router.Use(rest.AppInfo("updater", "jtrw", s.Version))
 	router.Use(rest.Ping)
 	router.Use(tollbooth_chi.LimitHandler(tollbooth.NewLimiter(10, nil)))
 	if s.UpdateDelay > 0 {
