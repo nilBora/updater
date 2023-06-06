@@ -3,7 +3,7 @@ package store
 import (
   "time"
   "encoding/json"
-  jbolt "github.com/umputun/updater/app/store/jbolt"
+  jbolt "github.com/nilBora/updater/app/store/jbolt"
 )
 
 const BUCKET_KEY = "jtrw/updater/command/info"

@@ -15,7 +15,7 @@ import (
 	log "github.com/go-pkgz/lgr"
 	"github.com/hashicorp/go-multierror"
 	"github.com/pkg/errors"
-	store "github.com/umputun/updater/app/store"
+	store "github.com/nilBora/updater/app/store"
 )
 
 // ShellRunner executes commands with shell

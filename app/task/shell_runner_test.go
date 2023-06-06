@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/google/uuid"
 
-	store "github.com/umputun/updater/app/store"
+	store "github.com/nilBora/updater/app/store"
 )
 
 func getStore() store.Store {
