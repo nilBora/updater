@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/umputun/updater/app/server/mocks"
+	"github.com/nilBora/updater/app/server/mocks"
 )
 
 func TestRest_Run(t *testing.T) {

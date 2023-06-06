@@ -1,4 +1,4 @@
-module github.com/umputun/updater
+module github.com/nilBora/updater
 
 go 1.17
 

@@ -14,8 +14,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	log "github.com/go-pkgz/lgr"
 	"github.com/go-pkgz/rest"
-	store "github.com/umputun/updater/app/store"
-	"github.com/umputun/updater/app/task"
+	store "github.com/nilBora/updater/app/store"
+	"github.com/nilBora/updater/app/task"
 	"github.com/google/uuid"
 )
 

@@ -13,10 +13,10 @@ import (
 	"github.com/go-pkgz/syncs"
 	"github.com/umputun/go-flags"
 
-	"github.com/umputun/updater/app/server"
-	"github.com/umputun/updater/app/task"
+	"github.com/nilBora/updater/app/server"
+	"github.com/nilBora/updater/app/task"
 
-	store "github.com/umputun/updater/app/store"
+	store "github.com/nilBora/updater/app/store"
 )
 
 var revision string
