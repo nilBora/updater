@@ -140,6 +140,27 @@ logout
 
 The main goal of this utility is to update containers; however, all it does is the remote activation of predefined commands. Such command can do anything user like, not just "docker pull && docker restart." For instance, it can be used to schedule remote jobs from some central orchestrator, run remote cleanup jobs, etc.
 
+## Show results
+
+If you can see result of your command, you can create request with variable `save` in json. For example:
+```json
+{"task":"test-echo", "secret":"123", "async": true, "save":  true}
+```
+
+Server get you some response
+```json
+{
+  "submitted": "ok",
+  "task": "test-echo",
+  "uuid": "4e318921-37b4-42d9-aa47-280a905f649a"
+}
+```
+
+After you can see result, if you create request with current uuid
+```
+http://localhost:8080/info/4e318921-37b4-42d9-aa47-280a905f649a
+```
+
 ## All parameters
 
 ```
