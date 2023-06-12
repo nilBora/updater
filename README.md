@@ -172,6 +172,7 @@ http://localhost:8080/info/4e318921-37b4-42d9-aa47-280a905f649a
       --timeout=      for how long update task can be running (default: 1m)
       --update-delay= delay between updates (default: 1s)
       --dbg           show debug info [$DEBUG]
+  -s  --storage_path  add storage path for botl DB 
 
 Help Options:
   -h, --help    Show this help message
